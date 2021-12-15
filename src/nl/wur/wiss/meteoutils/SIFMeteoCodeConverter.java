@@ -3,11 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package nl.wur.wiss.meteoutils;
+package nl.wur.wiss_framework.meteoutils;
+
+import nl.wur.wiss_framework.core.ScientificUnit;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Locale;
-import nl.wur.wiss.core.ScientificUnit;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  *

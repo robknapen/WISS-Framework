@@ -3,11 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package nl.wur.wiss.core;
-
-import nl.wur.wiss.core.ParXChange;
-import nl.wur.wiss.core.SimObject;
-import nl.wur.wiss.core.SimXChange;
+package nl.wur.wiss_framework.core;
 
 /**
  *

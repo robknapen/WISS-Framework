@@ -7,17 +7,18 @@
  * is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF
  * ANY KIND, either express or implied.
  */
-package nl.wur.wiss.meteoutils;
+package nl.wur.wiss_framework.meteoutils;
+
+import nl.wur.wiss_framework.core.ScientificUnit;
+import nl.wur.wiss_framework.core.ScientificUnitConversion;
+import nl.wur.wiss_framework.fileutils.SIFReader;
+import nl.wur.wiss_framework.mathutils.RangeUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import nl.wur.wiss.core.ScientificUnit;
-import nl.wur.wiss.core.ScientificUnitConversion;
-import nl.wur.wiss.fileutils.SIFReader;
-import nl.wur.wiss.mathutils.RangeUtils;
 
 /**
  * Provides meteo data and station location

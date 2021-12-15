@@ -18,7 +18,7 @@
  * See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-package nl.wur.wiss.mathutils;
+package nl.wur.wiss_framework.mathutils;
 
 import java.time.LocalDate;
 

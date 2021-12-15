@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package nl.wur.wiss.fileutils;
+package nl.wur.wiss_framework.fileutils;
+
+import nl.wur.wiss_framework.mathutils.RangeUtils;
 
 import java.util.ArrayList;
-import nl.wur.wiss.mathutils.RangeUtils;
 
 /**
  * Parses a string for words separated by separators and enclosed in quote characters.

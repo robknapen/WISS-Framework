@@ -7,7 +7,7 @@
  * is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF
  * ANY KIND, either express or implied.
  */
-package nl.wur.wiss.core;
+package nl.wur.wiss_framework.core;
 
 import java.io.Serializable;
 import java.util.Locale;

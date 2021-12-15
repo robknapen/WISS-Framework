@@ -3,11 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package nl.wur.wiss.meteoutils;
+package nl.wur.wiss_framework.meteoutils;
+
+import nl.wur.wiss_framework.core.ScientificUnit;
 
 import java.time.LocalDate;
 import java.util.Set;
-import nl.wur.wiss.core.ScientificUnit;
 
 /**
  * Interface meant to be used by a SimObject for reading meteo data
@@ -15,6 +16,19 @@ import nl.wur.wiss.core.ScientificUnit;
  * @author kraal001
  */
 public interface MeteoReader {
+
+    public static final String PUBLISHER_AUTOMATIC = "AUTOMATIC";
+
+    // can hold: AUTOMATIC / SimMeteo / SimPenman
+    // in case of AUTOMATIC, whether to publish or not is determined on
+    // SimObject creation
+    public static final String PUBLISHER_E0  = "PUBLISHER_E0";
+    public static final String PUBLISHER_ES0 = "PUBLISHER_ES0";
+    // can hold: AUTOMATIC / SimMeteo / SimPenman / SimPenmanMonteithFAO
+    // in case of AUTOMATIC, whether to publish or not is determined on
+    // SimObject creation
+    public static final String PUBLISHER_ET0 = "PUBLISHER_ET0";
+
     /** get longitude in decimal degrees of source data
      *
      * @return the required value

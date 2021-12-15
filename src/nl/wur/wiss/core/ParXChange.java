@@ -7,14 +7,15 @@
  * is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF
  * ANY KIND, either express or implied.
  */
-package nl.wur.wiss.core;
+package nl.wur.wiss_framework.core;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Collection of static simulation parameters.

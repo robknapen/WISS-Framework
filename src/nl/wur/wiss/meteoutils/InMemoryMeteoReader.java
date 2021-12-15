@@ -7,18 +7,19 @@
  * is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF
  * ANY KIND, either express or implied.
  */
-package nl.wur.wiss.meteoutils;
+package nl.wur.wiss_framework.meteoutils;
+
+import nl.wur.wiss_framework.core.ScientificUnit;
+import nl.wur.wiss_framework.core.ScientificUnitConversion;
+import nl.wur.wiss_framework.mathutils.RangeUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import nl.wur.wiss.mathutils.RangeUtils;
-import nl.wur.wiss.core.ScientificUnit;
-import nl.wur.wiss.core.ScientificUnitConversion;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * In-memory implementation of a MeteoReader.

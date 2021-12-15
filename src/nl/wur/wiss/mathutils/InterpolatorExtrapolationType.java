@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package nl.wur.wiss.mathutils;
+package nl.wur.wiss_framework.mathutils;
 
 /**
  *

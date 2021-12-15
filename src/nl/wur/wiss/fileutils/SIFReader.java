@@ -1,13 +1,14 @@
-package nl.wur.wiss.fileutils;
+package nl.wur.wiss_framework.fileutils;
+
+import nl.wur.wiss_framework.mathutils.RangeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import nl.wur.wiss.mathutils.RangeUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**

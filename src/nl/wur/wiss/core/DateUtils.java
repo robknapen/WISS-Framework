@@ -7,11 +7,12 @@
  * is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF
  * ANY KIND, either express or implied.
  */
-package nl.wur.wiss.core;
+package nl.wur.wiss_framework.core;
+
+import nl.wur.wiss_framework.mathutils.RangeUtils;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import nl.wur.wiss.mathutils.RangeUtils;
 
 /**
  * Provides utility methods to work with dates

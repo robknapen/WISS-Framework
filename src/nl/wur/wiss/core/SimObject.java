@@ -7,14 +7,15 @@
  * is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF
  * ANY KIND, either express or implied.
  */
-package nl.wur.wiss.core;
+package nl.wur.wiss_framework.core;
 
-import java.time.LocalDate;
-import java.util.Objects;
-import nl.wur.wiss.core.TimeDriver.ModelAction;
+import nl.wur.wiss_framework.core.TimeDriver.ModelAction;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.time.LocalDate;
+import java.util.Objects;
 
 /**
  * Base class for simulation classes

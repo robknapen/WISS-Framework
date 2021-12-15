@@ -7,7 +7,7 @@
  * is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF
  * ANY KIND, either express or implied.
  */
-package nl.wur.wiss.core;
+package nl.wur.wiss_framework.core;
 
 /**
  * Carries out a calendar with daily steps
@@ -15,8 +15,10 @@ package nl.wur.wiss.core;
  * @author Daniel van Kraalingen (daniel.vankraalingen@wur.nl)
  * @version 1
  */
+
+import nl.wur.wiss_framework.mathutils.RangeUtils;
+
 import java.time.LocalDate;
-import nl.wur.wiss.mathutils.RangeUtils;
 
 public class Timer {
 

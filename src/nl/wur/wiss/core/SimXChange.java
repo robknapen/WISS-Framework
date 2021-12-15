@@ -7,25 +7,24 @@
  * is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF
  * ANY KIND, either express or implied.
  */
-package nl.wur.wiss.core;
+package nl.wur.wiss_framework.core;
+
+import nl.wur.wiss_framework.mathutils.Interpolator;
+import nl.wur.wiss_framework.mathutils.RangeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDate;
+import java.util.*;
+
 import static java.lang.Double.max;
 import static java.lang.Double.min;
 import static java.lang.Integer.max;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Random;
-import nl.wur.wiss.mathutils.Interpolator;
-import nl.wur.wiss.mathutils.RangeUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Class enabling dynamic exchange of data
@@ -105,13 +104,17 @@ public class SimXChange {
          * @return value of first non-missing Y, or NaN if all values were missing
          */
         public double firstY() {
-            for (int i = firstIndex; i <= lastIndex; i++) {
-                final double v = item.varValues[i];
-                if (!Double.isNaN(v)) {
-                    return v;
+            if (item.isAggregated) {
+                return item.first;
+            } else {
+                for (int i = firstIndex; i <= lastIndex; i++) {
+                    if (item.hasValues[i]) {
+                        return item.varValues[i];
+                    }
                 }
+
+                return Double.NaN;
             }
-            return Double.NaN;
         }
 
         /**
@@ -120,13 +123,16 @@ public class SimXChange {
          * @return value of first non-missing Y, or NaN if all values were missing
          */
         public double lastY() {
-            for (int i = lastIndex; i >= firstIndex; i--) {
-                final double v = item.varValues[i];
-                if (!Double.isNaN(v)) {
-                    return v;
+            if (item.isAggregated) {
+                return item.last;
+            } else {
+                for (int i = lastIndex; i >= firstIndex; i--) {
+                    if (item.hasValues[i]) {
+                        return item.varValues[i];
+                    }
                 }
+                return Double.NaN;
             }
-            return Double.NaN;
         }
 
         /**
@@ -136,8 +142,7 @@ public class SimXChange {
          */
         public int firstXIndex() {
             for (int i = firstIndex; i <= lastIndex; i++) {
-                final double v = item.varValues[i];
-                if (!Double.isNaN(v)) {
+                if (item.hasValues[i]) {
                     return i;
                 }
             }
@@ -151,8 +156,7 @@ public class SimXChange {
          */
         public int lastXIndex() {
             for (int i = lastIndex; i >= firstIndex; i--) {
-                final double v = item.varValues[i];
-                if (!Double.isNaN(v)) {
+                if (item.hasValues[i]) {
                     return i;
                 }
             }
@@ -165,18 +169,21 @@ public class SimXChange {
          * @return lowest Y value, or NaN if all values were missing
          */
         public double minY() {
-            double result = Double.MAX_VALUE;
-            for (int i = firstIndex; i <= lastIndex; i++) {
-                final double v = item.varValues[i];
-                if (!Double.isNaN(v)) {
-                    result = min(result, v);
+            if (item.isAggregated) {
+                return item.min;
+            } else {
+                double result = Double.MAX_VALUE;
+                for (int i = firstIndex; i <= lastIndex; i++) {
+                    if (item.hasValues[i]) {
+                        result = min(result, item.varValues[i]);
+                    }
                 }
+                if (result == Double.MAX_VALUE) {
+                    // no value found
+                    result = Double.NaN;
+                }
+                return result;
             }
-            if (result == Double.MAX_VALUE) {
-                // no value found
-                result = Double.NaN;
-            }
-            return result;
         }
 
         /**
@@ -185,18 +192,21 @@ public class SimXChange {
          * @return highest Y value, or NaN if all values were missing
          */
         public double maxY() {
-            double result = Double.MIN_VALUE;
-            for (int i = firstIndex; i <= lastIndex; i++) {
-                final double v = item.varValues[i];
-                if (!Double.isNaN(v)) {
-                    result = max(result, v);
+            if (item.isAggregated) {
+                return item.max;
+            } else {
+                double result = Double.MIN_VALUE;
+                for (int i = firstIndex; i <= lastIndex; i++) {
+                    if (item.hasValues[i]) {
+                        result = max(result,  item.varValues[i]);
+                    }
                 }
+                if (result == Double.MIN_VALUE) {
+                    // no value found
+                    result = Double.NaN;
+                }
+                return result;
             }
-            if (result == Double.MIN_VALUE) {
-                // no value found
-                result = Double.NaN;
-            }
-            return result;
         }
 
         /**
@@ -205,18 +215,21 @@ public class SimXChange {
          * @return first index of X, or MISSINGINDEX if all values were missing
          */
         public int minXIndex() {
-            int    result = SimXChange.MISSINGINDEX;
-            double vLeast = Double.MAX_VALUE;
-            for (int i = firstIndex; i <= lastIndex; i++) {
-                final double v = item.varValues[i];
-                if (!Double.isNaN(v)) {
-                    if (v < vLeast) {
-                        vLeast = v;
-                        result = i;
+            if (item.isAggregated) {
+                return item.minIndex;
+            } else {
+                int result = SimXChange.MISSINGINDEX;
+                double vLeast = Double.MAX_VALUE;
+                for (int i = firstIndex; i <= lastIndex; i++) {
+                    if (item.hasValues[i]) {
+                        if (item.varValues[i] < vLeast) {
+                            vLeast = item.varValues[i];
+                            result = i;
+                        }
                     }
                 }
+                return result;
             }
-            return result;
         }
 
         /**
@@ -225,18 +238,21 @@ public class SimXChange {
          * @return last index of X, or MISSINGINDEX if all values were missing
          */
         public int maxXIndex() {
-            int    result   = SimXChange.MISSINGINDEX;
-            double vHighest = Double.MIN_VALUE;
-            for (int i = firstIndex; i <= lastIndex; i++) {
-                final double v = item.varValues[i];
-                if (!Double.isNaN(v)) {
-                    if (v > vHighest) {
-                        vHighest = v;
-                        result = i;
+            if (item.isAggregated) {
+                return item.maxIndex;
+            } else {
+                int result = SimXChange.MISSINGINDEX;
+                double vHighest = Double.MIN_VALUE;
+                for (int i = firstIndex; i <= lastIndex; i++) {
+                    if (item.hasValues[i]) {
+                        if (item.varValues[i] > vHighest) {
+                            vHighest = item.varValues[i];
+                            result = i;
+                        }
                     }
                 }
+                return result;
             }
-            return result;
         }
 
         /**
@@ -245,19 +261,22 @@ public class SimXChange {
          * @return sum of Y values, or return NaN if all values were missing
          */
         public double sumY() {
-            double  result = 0.0;
-            boolean fnd    = false;
-            for (int i = firstIndex; i <= lastIndex; i++) {
-                final double v = item.varValues[i];
-                if (!Double.isNaN(v)) {
-                    fnd = true;
-                    result = result + v;
+            if (item.isAggregated) {
+                return item.sum;
+            } else {
+                double  result = 0.0;
+                boolean fnd    = false;
+                for (int i = firstIndex; i <= lastIndex; i++) {
+                    if (item.hasValues[i]) {
+                        fnd = true;
+                        result = result + item.varValues[i];
+                    }
                 }
+                if (!fnd) {
+                    result = Double.NaN;
+                }
+                return result;
             }
-            if (!fnd) {
-                result = Double.NaN;
-            }
-            return result;
         }
 
         /**
@@ -266,14 +285,17 @@ public class SimXChange {
          * @return count of all values, or 0 if all values were missing
          */
         public double countY() {
-            int result = 0;
-            for (int i = firstIndex; i <= lastIndex; i++) {
-                final double v = item.varValues[i];
-                if (!Double.isNaN(v)) {
-                    result++;
+            if (item.isAggregated) {
+                return item.count;
+            } else {
+                int result = 0;
+                for (int i = firstIndex; i <= lastIndex; i++) {
+                    if (item.hasValues[i]) {
+                        result++;
+                    }
                 }
+                return result;
             }
-            return result;
         }
 
         /**
@@ -307,10 +329,20 @@ public class SimXChange {
         public boolean        lowerBoundInclusive;
         public double         upperBound;
         public boolean        upperBoundInclusive;
-        public double[]       varValues;
-        public double         varChange;
         public boolean        isLocked;
-
+        public double         varChange;
+        public boolean[]      hasValues;    // always allocated, flag indicates whether valid value is at index
+        public boolean        isAggregated; // whether only aggregations are stored instead of the whole time series (saves memory in array varValues)
+        public double[]       varValues;    // only allocated with isAggregated = false (saves memory)
+        public int            count;        // only used with isAggregated = true
+        public double         first;        // only used with isAggregated = true
+        public double         previous;     // only used with isAggregated = true
+        public double         last;         // only used with isAggregated = true
+        public double         min;          // only used with isAggregated = true
+        public int            minIndex;     // only used with isAggregated = true
+        public double         max;          // only used with isAggregated = true
+        public int            maxIndex;     // only used with isAggregated = true
+        public double         sum;          // only used with isAggregated = true
         /**
          * Default constructor
          */
@@ -342,13 +374,22 @@ public class SimXChange {
             this.lowerBoundInclusive = aItemToClone.lowerBoundInclusive;
             this.upperBound          = aItemToClone.upperBound;
             this.upperBoundInclusive = aItemToClone.upperBoundInclusive;
-
-            this.varValues = new double[aItemToClone.varValues.length];
-
+            this.isLocked            = aItemToClone.isLocked;
+            this.varChange           = aItemToClone.varChange;
+            this.hasValues           = new boolean[aItemToClone.hasValues.length];
+            System.arraycopy(aItemToClone.hasValues, 0, this.hasValues, 0, aItemToClone.hasValues.length);
+            this.isAggregated        = aItemToClone.isAggregated;
+            this.varValues           = new double[aItemToClone.varValues.length];
             System.arraycopy(aItemToClone.varValues, 0, this.varValues, 0, aItemToClone.varValues.length);
-
-            this.varChange = aItemToClone.varChange;
-            this.isLocked  = aItemToClone.isLocked;
+            this.count               = aItemToClone.count;
+            this.first               = aItemToClone.first;
+            this.previous            = aItemToClone.previous;
+            this.last                = aItemToClone.last;
+            this.min                 = aItemToClone.min;
+            this.minIndex            = aItemToClone.minIndex;
+            this.max                 = aItemToClone.max;
+            this.maxIndex            = aItemToClone.maxIndex;
+            this.sum                 = aItemToClone.sum;
         }
     }
 
@@ -439,6 +480,7 @@ public class SimXChange {
 
     static final int INITIALSIMIDCNT   = 10;
     static final int INITIALVARNAMECNT = 100;
+    static final int INITIALFULLTIMESERIESCNT = 10;
 
     // object fields
     private boolean   datePeriodSet = false;
@@ -464,6 +506,8 @@ public class SimXChange {
     // stores forced states
     private final ArrayList<StateVarForceItem> stateVarForceValues;
 
+    private final HashSet<String> fullTimeSeriesList;
+
     private boolean traceLogging = false;
 
     private boolean pause = false;
@@ -488,6 +532,8 @@ public class SimXChange {
 
         varNameMap          = new HashMap<>(INITIALVARNAMECNT);
         stateVarForceValues = new ArrayList<>(INITIALVARNAMECNT);
+
+        fullTimeSeriesList = new HashSet<>(INITIALFULLTIMESERIESCNT);
 
         runID = aID;
     }
@@ -668,7 +714,7 @@ public class SimXChange {
         }
 
         if (indexDate >= 0) {
-            return (!Double.isNaN(item.varValues[indexDate]));
+            return item.hasValues[indexDate];
         } else {
             return false;
         }
@@ -870,12 +916,24 @@ public class SimXChange {
 
             // allocation and initial values for item.varValues
             item.varValues = new double[(this.maxDuration() + 1)];
+            item.hasValues = new boolean[(this.maxDuration() + 1)];
             for (int i = 0; i <= (item.varValues.length - 1); i++) {
                 item.varValues[i] = Double.NaN;
+                item.hasValues[i] = false;
             }
 
-            // new item and initial value for item.varChange
-            item.varChange = Double.NaN;
+            // new item and initial empty values
+            item.varChange    = Double.NaN;
+            item.isAggregated = !fullTimeSeriesList.contains(aVarName);
+            item.count        = 0;
+            item.first        = Double.NaN;
+            item.previous     = Double.NaN;
+            item.last         = Double.NaN;
+            item.min          = Double.NaN;
+            item.minIndex     = SimXChange.MISSINGINDEX;
+            item.max          = Double.NaN;
+            item.maxIndex     = SimXChange.MISSINGINDEX;
+            item.sum          = Double.NaN;
 
             // add to lists at the end
             simIDVarNameList.add(item);
@@ -1340,9 +1398,8 @@ public class SimXChange {
                                                               CLASSNAME_IN, methodName, aDate.toString(), curDate.toString()));
         }
 
-        curDate                 = aDate;
-        curDateIndex            = DateUtils.diffDays(startDate, curDate);
-        final int prevDateIndex = curDateIndex - 1;
+        curDate      = aDate;
+        curDateIndex = DateUtils.diffDays(startDate, curDate);
 
         // update only state items with the rate of change, leave aux as is, have received NaN value
         // initially, so is ok
@@ -1354,8 +1411,47 @@ public class SimXChange {
                     // and remains at NaN, consequently it cannot be updated ever again
                     if (!Double.isNaN(item.varChange)) {
                         // bounds checks are done in methods setSimValueAux en setSimValueState
-                        item.varValues[curDateIndex] = item.varValues[prevDateIndex] + item.varChange;
-                        item.varChange               = Double.NaN;
+                        item.hasValues[curDateIndex] = true;
+
+                        if (!item.isAggregated) {
+                            item.varValues[curDateIndex] = item.varValues[curDateIndex - 1] + item.varChange;
+                        } else {
+                            item.previous = item.last;
+                            item.last     = item.last + item.varChange;
+
+                            if (item.count == 0) item.first = item.last;
+
+                            if (item.count > 0) {
+                                // store the first index where the minimum occurred
+                                if (item.min < item.last) {
+                                    item.min      = item.last;
+                                    item.minIndex = curDateIndex;
+                                }
+                            } else {
+                                item.min = item.last;
+                                item.minIndex = curDateIndex;
+                            }
+
+                            if (item.count > 0) {
+                                // store the first index where the maximum occurred
+                                if (item.max > item.last) {
+                                    item.max      = item.last;
+                                    item.maxIndex = curDateIndex;
+                                }
+                            } else {
+                                item.max = item.last;
+                                item.maxIndex = curDateIndex;
+                            }
+
+                            if (item.count > 0) {
+                                item.sum = item.sum + item.last;
+                            } else {
+                                item.sum = item.last;
+                            }
+
+                            item.count++;
+                        }
+                        item.varChange = Double.NaN;
 
                         result++;
                     }
@@ -1390,12 +1486,12 @@ public class SimXChange {
 
         if (!this.isVarNameValueMissing(aSimValueState.n, aSimValueState.simID)) {
             throw new IllegalArgumentException(String.format("%s.%s : %s cannot be forced on date %s because this variable with a different simID is already active.",
-                                                              CLASSNAME_IN, methodName, aSimValueState.getCaptionState(), curDate.toString()));
+                    CLASSNAME_IN, methodName, aSimValueState.getCaptionState(), curDate.toString()));
         }
 
         if (Double.isNaN(aSimValueState.v)) {
             throw new IllegalArgumentException(String.format("%s.%s : %s cannot be forced on date %s because this value is missing.",
-                                                              CLASSNAME_IN, methodName, aSimValueState.getCaptionState(), curDate.toString()));
+                    CLASSNAME_IN, methodName, aSimValueState.getCaptionState(), curDate.toString()));
         }
 
         if (!this.isValidToken(aSimValueState.getT())) {
@@ -1403,20 +1499,18 @@ public class SimXChange {
             aSimValueState.setT(token);
         }
 
-        final int                  indexState = this.checkValidToken(aSimValueState.getT(), methodName, true, TypeRequirement.STATE);
-        final SimIDVarNameListItem item       = simIDVarNameList.get(indexState);
-
-        final double systemVarValues[] = item.varValues;
+        final int indexState = this.checkValidToken(aSimValueState.getT(), methodName, true, TypeRequirement.STATE);
+        final SimIDVarNameListItem item = simIDVarNameList.get(indexState);
 
         // if the state on the date is missing, check that all previous values
         // (if any) are also missing, it is ok if the value on the date is not missing
         // in that case the value will simply be overwritten
 
-        if (Double.isNaN(systemVarValues[curDateIndex])) {
+        if (!item.hasValues[curDateIndex]) {
             for (int i = 0; i <= (curDateIndex - 1); i++) {
-                if (!Double.isNaN(systemVarValues[i])) {
+                if (item.hasValues[i]) {
                     throw new IllegalArgumentException(String.format("%s.%s : %s cannot be forced on date %s because previous values are not missing.",
-                                                                      CLASSNAME_IN, methodName, aSimValueState.getCaptionState(), curDate.toString()));
+                            CLASSNAME_IN, methodName, aSimValueState.getCaptionState(), curDate.toString()));
                 }
             }
         }
@@ -1426,12 +1520,53 @@ public class SimXChange {
 
         if (!this.inRange(item, candidateStateValue)) {
             throw new IllegalArgumentException(String.format("%s.%s : %s cannot be forced on date %s because of a range violation: value=%g, unit=%s, range=%s.",
-                                                              CLASSNAME_IN, methodName, aSimValueState.getCaptionState(), curDate.toString(), candidateStateValue, item.scientificUnit.getUnitCaption(), this.rangeCaption(item)));
+                    CLASSNAME_IN, methodName, aSimValueState.getCaptionState(), curDate.toString(), candidateStateValue, item.scientificUnit.getUnitCaption(), this.rangeCaption(item)));
         }
 
         // situation for the state is ok, value can be set
-        systemVarValues[curDateIndex] = candidateStateValue;
-        this.addStateVarForceItem(indexState, systemVarValues[curDateIndex], candidateStateValue);
+        if (!item.isAggregated) {
+            this.addStateVarForceItem(indexState, item.varValues[curDateIndex], candidateStateValue);
+
+            item.varValues[curDateIndex] = candidateStateValue;
+        } else {
+            this.addStateVarForceItem(indexState, item.last, candidateStateValue);
+
+            item.previous = item.last;
+            item.last     = candidateStateValue;
+
+            if (item.count == 0) item.first = item.last;
+
+            if (item.count > 0) {
+                // store the first index where the minimum occurred
+                if (item.min < item.last) {
+                    item.min      = item.last;
+                    item.minIndex = curDateIndex;
+                }
+            } else {
+                item.min = item.last;
+                item.minIndex = curDateIndex;
+            }
+
+            if (item.count > 0) {
+                // store the first index where the maximum occurred
+                if (item.max > item.last) {
+                    item.max      = item.last;
+                    item.maxIndex = curDateIndex;
+                }
+            } else {
+                item.max = item.last;
+                item.maxIndex = curDateIndex;
+            }
+
+            if (item.count > 0) {
+                item.sum = item.sum + item.last;
+            } else {
+                item.sum = item.last;
+            }
+
+            item.count++;
+        }
+        item.hasValues[curDateIndex] = true;
     }
 
     /**
@@ -1475,8 +1610,14 @@ public class SimXChange {
         }
 
         // convert value to native unit
-        final double candidateRateValue  = ScientificUnitConversion.convert(aSimValueState.n, aSimValueState.r, aSimValueState.u, item.scientificUnit);
-        final double candidateStateValue = item.varValues[curDateIndex] + candidateRateValue;
+        final double candidateRateValue = ScientificUnitConversion.convert(aSimValueState.n, aSimValueState.r, aSimValueState.u, item.scientificUnit);
+
+        final double candidateStateValue;
+        if (!item.isAggregated) {
+            candidateStateValue = item.varValues[curDateIndex] + candidateRateValue;
+        } else {
+            candidateStateValue = item.last + candidateRateValue;
+        }
 
         if (!this.inRange(item, candidateStateValue)) {
             throw new IllegalArgumentException(String.format("%s.%s : %s cannot be set on date %s because of a range violation for the new value of the corresponding state: oldvalue=%g, newvalue=%g, unit=%s, range=%s.",
@@ -1552,11 +1693,11 @@ public class SimXChange {
 
         if (prevDateIndex >= 0) {
             // there is a previous item
-            if (Double.isNaN(item.varValues[prevDateIndex])) {
+            if (!item.hasValues[prevDateIndex]) {
                 // the previous item is missing, see if all earliers items
                 // are also missing
                 for (int i = 0; i < prevDateIndex; i++) {
-                    if (!Double.isNaN(item.varValues[i])) {
+                    if (item.hasValues[i]) {
                         throw new IllegalArgumentException(String.format("%s.%s : %s cannot be set on date %s because previous values are not missing.",
                                                                           CLASSNAME_IN, methodName, aSimValueAux.getCaption(), curDate.toString()));
                     }
@@ -1573,7 +1714,46 @@ public class SimXChange {
         }
 
         // situation for the value is ok, value can be set
-        item.varValues[curDateIndex] = candidateAuxValue;
+        item.hasValues[curDateIndex] = true;
+
+        if (!item.isAggregated) {
+            item.varValues[curDateIndex] = candidateAuxValue;
+        } else {
+            item.previous = item.last;
+            item.last     = candidateAuxValue;
+
+            if (item.count == 0) item.first = item.last;
+
+            if (item.count > 0) {
+                // store the first index where the minimum occurred
+                if (item.min < item.last) {
+                    item.min      = item.last;
+                    item.minIndex = curDateIndex;
+                }
+            } else {
+                item.min = item.last;
+                item.minIndex = curDateIndex;
+            }
+
+            if (item.count > 0) {
+                // store the first index where the maximum occurred
+                if (item.max > item.last) {
+                    item.max      = item.last;
+                    item.maxIndex = curDateIndex;
+                }
+            } else {
+                item.max = item.last;
+                item.maxIndex = curDateIndex;
+            }
+
+            if (item.count > 0) {
+                item.sum = item.sum + item.last;
+            } else {
+                item.sum = item.last;
+            }
+
+            item.count++;
+        }
     }
 
     /**
@@ -1743,21 +1923,32 @@ public class SimXChange {
 
         if (!RangeUtils.inRange(aDateIndex, 0, curDateIndex)) {
             throw new IllegalArgumentException(String.format("%s.%s : aDateIndex value (%d) not in valid range (0, %d).",
-                                                              CLASSNAME_IN, methodName, aSimIDVarNameListIndex, curDateIndex));
+                                                              CLASSNAME_IN, methodName, aDateIndex, curDateIndex));
         }
 
-        final SimIDVarNameListItem simIDVarNameListItem  = simIDVarNameList.get(aSimIDVarNameListIndex);
+        final SimIDVarNameListItem item  = simIDVarNameList.get(aSimIDVarNameListIndex);
 
-        double result = simIDVarNameListItem.varValues[aDateIndex];
+        if ((aDateIndex < (curDateIndex - 1)) && item.isAggregated) {
+            throw new IllegalArgumentException(String.format("%s.%s : %s aDateIndex value (%d) illegal for aggregated states.",
+                    CLASSNAME_IN, methodName, item.simIDVarName, aDateIndex));
+        }
+
+        // note that the else part can only be safely done if the previous if is programmed correctly
+        double result;
+        if (!item.isAggregated) {
+            result = item.varValues[aDateIndex];
+        } else {
+            result = (aDateIndex == curDateIndex) ? item.last : item.previous;
+        }
 
         if (!Double.isNaN(result)) {
-            result = ScientificUnitConversion.convert(simIDVarNameListItem.varName, result, simIDVarNameListItem.scientificUnit, aScientificUnit);
+            result = ScientificUnitConversion.convert(item.varName, result, item.scientificUnit, aScientificUnit);
         }
 
         if (aCheckNotMissing) {
             if (Double.isNaN(result)) {
                 throw new IllegalArgumentException(String.format("%s.%s : Variable %s is missing.",
-                                                                  CLASSNAME_IN, methodName, simIDVarNameListItem.simIDVarName));
+                                                                  CLASSNAME_IN, methodName, item.simIDVarName));
             }
         }
 
@@ -1990,6 +2181,7 @@ public class SimXChange {
         final SimIDVarNameListItem item = simIDVarNameList.get(index);
 
         final int firstIndex = 0;
+
         final int lastIndex  = item.varValues.length - 1;
 
         final Aggregation aggregation = new Aggregation(item, firstIndex, lastIndex);
@@ -2255,6 +2447,11 @@ public class SimXChange {
         final int index = this.checkValidToken(aToken, methodName, false, TypeRequirement.NOREQUIREMENT);
         final SimIDVarNameListItem item = simIDVarNameList.get(index);
 
+        if (item.isAggregated) {
+            throw new IllegalArgumentException(String.format("%s.%s : %s is defined aggregated, so time series data are not available",
+                                                             CLASSNAME_IN, methodName, item.simIDVarName));
+        }
+
         final int firstIndex = 1; // start at the 2nd index !!
         final int lastIndex  = item.varValues.length - 1;
 
@@ -2364,12 +2561,17 @@ public class SimXChange {
 
         final Interpolator interpolator = new Interpolator(item.simIDVarName, ScientificUnit.DATE, item.scientificUnit);
 
+        if (item.isAggregated) {
+            throw new IllegalArgumentException(String.format("%s.%s : %s is defined aggregated, so time series data are not available",
+                    CLASSNAME_IN, methodName, item.simIDVarName));
+        }
+
         // this assumes that there is only one 'burst' of data, which should be guaranteed prior, it is not
         // this method's responsibility to check this
         // simply copy non-missing data to the interpolator
-        for (int indexDate = 0; indexDate <= (simIDVarNameList.get(0).varValues.length - 1); indexDate++) {
-            final double v = item.varValues[indexDate];
-            if (!Double.isNaN(v)) {
+        for (int indexDate = 0; indexDate <= (simIDVarNameList.get(0).hasValues.length - 1); indexDate++) {
+            if (item.hasValues[indexDate]) {
+                final double v = item.varValues[indexDate];
                 if (!aXYSwapped) {
                     // indexDate is always ascending, so no special provision required to avoid adding
                     // identical x values
@@ -2538,8 +2740,7 @@ public class SimXChange {
         for (int i = 0; i <= (simIDVarNameList.size() - 1); i++) {
             if (simIDVarNameList.get(i).varName.equals(varName)) {
                 final SimIDVarNameListItem item = simIDVarNameList.get(i);
-                final double tmp = item.varValues[aDateIndex];
-                if (!Double.isNaN(tmp)) {
+                if (item.hasValues[aDateIndex]) {
                     cnt++;
 
                     if (cnt == 1) {
@@ -2705,15 +2906,14 @@ public class SimXChange {
 
         final ArrayList<String> result = new ArrayList<>();
 
-        for (int indexDate = 0; indexDate <= (simIDVarNameList.get(0).varValues.length - 1); indexDate++) {
+        for (int indexDate = 0; indexDate <= (simIDVarNameList.get(0).hasValues.length - 1); indexDate++) {
 
-            for (int indexState = 0; indexState <= (simIDVarNameList.size() - 1); indexState++) {
+            for (int indexList = 0; indexList <= (simIDVarNameList.size() - 1); indexList++) {
 
-                final String itemSimID       = simIDVarNameList.get(indexState).simID;
-                final String itemVarName     = simIDVarNameList.get(indexState).varName;
-                final double itemOutputValue = simIDVarNameList.get(indexState).varValues[indexDate];
+                final String itemSimID   = simIDVarNameList.get(indexList).simID;
+                final String itemVarName = simIDVarNameList.get(indexList).varName;
 
-                if (!Double.isNaN(itemOutputValue) && itemVarName.equals(varName)) {
+                if (simIDVarNameList.get(indexList).hasValues[indexDate] && itemVarName.equals(varName)) {
                     if (!result.contains(itemSimID)) {
                         result.add(itemSimID);
                     }
@@ -2914,6 +3114,30 @@ public class SimXChange {
     // begin: miscellaneous methods
 
     /**
+     * Method to switch on full time series gathering (enabling certain output
+     * query functions)
+     * @param aVarName
+     */
+    public void SetFullTimeSeries(String aVarName) {
+
+        final String methodName = "SetFullTimeSeries";
+
+        if (StringUtils.isBlank(aVarName)) {
+            throw new IllegalArgumentException(String.format("%s.%s : Empty variable.",
+                    CLASSNAME_IN, methodName));
+        }
+
+        if (curDateIndex != -1) {
+            throw new IllegalArgumentException(String.format("%s.%s : %s cannot be set to full time series once simulation has started",
+                    CLASSNAME_IN, methodName, aVarName));
+        }
+
+        if (!fullTimeSeriesList.contains(aVarName)) {
+            fullTimeSeriesList.add(aVarName);
+        }
+    }
+
+    /**
      * Method to create a report file of the time series data and state forcing
      * contained in the object.
      * <p>
@@ -2956,6 +3180,10 @@ public class SimXChange {
         final String SECTIONFORCEDSTATES     = COMMENTPREFIX + " Time series of forced state and auxiliary variables";
 
         final String HEADER_WOFOST_VERSION   = COMMENTPREFIX + " WISS-WOFOST version 1.0"; // TODO: get real version number
+
+        if (!true) {
+            throw new IllegalArgumentException("hier nog doen");
+        }
 
         if (StringUtils.isBlank(aFilePath)) {
             throw new IllegalArgumentException(String.format("%s.%s : Empty file path.",

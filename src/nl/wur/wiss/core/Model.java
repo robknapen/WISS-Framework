@@ -7,15 +7,16 @@
  * is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF
  * ANY KIND, either express or implied.
  */
-package nl.wur.wiss.core;
+package nl.wur.wiss_framework.core;
 
-import java.util.ArrayList;
-import nl.wur.wiss.core.TimeDriver.ModelAction;
+import nl.wur.wiss_framework.core.TimeDriver.ModelAction;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
+
+import java.util.ArrayList;
 
 /**
  * The base class that handles simulation objects. SimObjects can be added,

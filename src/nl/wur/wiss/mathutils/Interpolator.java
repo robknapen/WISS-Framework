@@ -18,15 +18,16 @@
  * See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-package nl.wur.wiss.mathutils;
+package nl.wur.wiss_framework.mathutils;
+
+import nl.wur.wiss_framework.core.ScientificUnit;
+import nl.wur.wiss_framework.core.ScientificUnitConversion;
+import org.apache.commons.math3.linear.RealMatrix;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
-import nl.wur.wiss.core.ScientificUnit;
-import nl.wur.wiss.core.ScientificUnitConversion;
-import org.apache.commons.math3.linear.RealMatrix;
 
 /**
  *

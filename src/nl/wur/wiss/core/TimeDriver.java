@@ -7,11 +7,12 @@
  * is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF
  * ANY KIND, either express or implied.
  */
-package nl.wur.wiss.core;
+package nl.wur.wiss_framework.core;
 
-import java.time.LocalDate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.time.LocalDate;
 
 /**
  * Drives a Model object from start to finish, including initialisation,

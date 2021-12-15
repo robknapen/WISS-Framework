@@ -3,18 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package nl.wur.wiss.meteoutils;
+package nl.wur.wiss_framework.meteoutils;
+
+import nl.wur.wiss_framework.fileutils.SIFReader;
+import nl.wur.wiss_framework.fileutils.SIFReaderLoadModeType;
+import nl.wur.wiss_framework.fileutils.SIFTimeStampConverter;
+import nl.wur.wiss_framework.mathutils.RangeUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.util.Set;
-import nl.wur.wiss.fileutils.SIFReader;
-import nl.wur.wiss.fileutils.SIFReaderLoadModeType;
-import nl.wur.wiss.fileutils.SIFTimeStampConverter;
-import nl.wur.wiss.mathutils.RangeUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  *

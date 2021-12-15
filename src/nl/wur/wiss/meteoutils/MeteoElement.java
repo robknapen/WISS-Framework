@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package nl.wur.wiss.meteoutils;
+package nl.wur.wiss_framework.meteoutils;
 
 /**
  * Enumeration of meteo elements
@@ -13,8 +13,12 @@ package nl.wur.wiss.meteoutils;
  */
 
 public enum MeteoElement {
-    /** unknown meteo element */
-    UNKNOWN,
+    /** Longitude in decimal degrees of the meteo data */
+    LONGITUDEDD,
+    /** Latitude in decimal degrees of the meteo data */
+    LATITUDEDD,
+    /** Altitude in meters of the meteo data */
+    ALTITUDEM,
     /** Average temperature over time period */
     TM_AV,
     /** Minimum temperature over time period */
